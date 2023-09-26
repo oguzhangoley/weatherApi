@@ -1,6 +1,7 @@
 package com.skyapi.weatherforcast.location;
 
 import com.skyapi.weatherforcast.common.Location;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,20 +12,20 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/v1/location")
+@RequestMapping("/v1/locations")
 public class LocationApiController {
 
-    private LocationService locationService;
+    private final LocationService locationService;
 
     public LocationApiController(LocationService locationService) {
         this.locationService = locationService;
     }
 
     @PostMapping
-    public ResponseEntity<Location> addLocation(@RequestBody Location location)
+    public ResponseEntity<Location> addLocation(@RequestBody @Valid Location location)
     {
         Location addedLocation = locationService.add(location);
-        URI uri = URI.create("v1/locations"+location.getCode());
+        URI uri = URI.create("v1/locations/"+addedLocation.getCode());
         return ResponseEntity.created(uri).body(addedLocation);
     }
 }
