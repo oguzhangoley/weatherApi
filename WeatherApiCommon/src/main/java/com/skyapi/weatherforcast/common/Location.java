@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -39,6 +41,9 @@ public class Location {
     private boolean enabled;
     @JsonIgnore
     private boolean trashed;
+
+    @OneToMany(mappedBy = "id.location",cascade = CascadeType.ALL)
+    private List<HourlyWeather> listHourlyWeather = new ArrayList<>();
 
     public Location() {
     }
@@ -134,5 +139,13 @@ public class Location {
 
     public void setRealtimeWeather(RealtimeWeather realtimeWeather) {
         this.realtimeWeather = realtimeWeather;
+    }
+
+    public List<HourlyWeather> getListHourlyWeather() {
+        return listHourlyWeather;
+    }
+
+    public void setListHourlyWeather(List<HourlyWeather> listHourlyWeather) {
+        this.listHourlyWeather = listHourlyWeather;
     }
 }
