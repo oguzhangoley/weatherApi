@@ -1,12 +1,14 @@
 package com.skyapi.weatherforcast.location;
 
 import com.skyapi.weatherforcast.common.Location;
+import com.skyapi.weatherforcast.common.RealtimeWeather;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +46,7 @@ public class LocationRepositoryTests {
     }
 
     @Test
-    public void testGetNotFound(){
+    public void testGetNotFound() {
         String code = "ABCD";
         Location location = repository.findByCode(code);
 
@@ -52,7 +54,7 @@ public class LocationRepositoryTests {
     }
 
     @Test
-    public void testGetOk(){
+    public void testGetOk() {
         String code = "NYC_USA";
         Location location = repository.findByCode(code);
 
@@ -61,12 +63,33 @@ public class LocationRepositoryTests {
     }
 
     @Test
-    public void testTrashSuccess(){
+    public void testTrashSuccess() {
         String code = "DELHI_IN";
         repository.trashByCode(code);
 
         Location location = repository.findByCode(code);
         assertThat(location).isNull();
+    }
+
+    @Test
+    public void testAddRealtimeWeatherData() {
+        String code = "NYC_USA";
+        Location location = repository.findByCode(code);
+        RealtimeWeather realtimeWeather = location.getRealtimeWeather();
+        if (realtimeWeather == null) {
+            realtimeWeather = new RealtimeWeather();
+            realtimeWeather.setLocation(location);
+            location.setRealtimeWeather(realtimeWeather);
+        }
+        realtimeWeather.setTemperature(-1);
+        realtimeWeather.setHumidity(30);
+        realtimeWeather.setPrecipitation(40);
+        realtimeWeather.setStatus("Snowy");
+        realtimeWeather.setWindSpeed(15);
+        realtimeWeather.setLastUpdated(new Date());
+
+        Location updatedLocation = repository.save(location);
+        assertThat(updatedLocation.getRealtimeWeather().getLocationCode()).isEqualTo(code);
     }
 
 }

@@ -2,12 +2,10 @@ package com.skyapi.weatherforcast.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.Objects;
 
@@ -16,31 +14,45 @@ import java.util.Objects;
 public class Location {
     @Column(length = 12, nullable = false, unique = true)
     @Id
-    @NotBlank
+    @NotNull(message = "Location code cannot be null")
+    @Length(min = 3, max = 12, message = "Location code must have 3-12 characters")
     private String code;
     @Column(length = 128, nullable = false)
     @JsonProperty("city_name")
-    @NotBlank
+    @NotBlank(message = "City cannot be left blank")
     private String cityName;
 
     @Column(length = 64, nullable = false)
     @JsonProperty("country_name")
-    @NotBlank
+    @NotBlank(message = "Country name cannot be left blank")
     private String countryName;
 
 
-    @Column(length = 128, nullable = false)
+    @Column(length = 128, nullable = true)
     @JsonProperty("region_name")
-    @NotNull
     private String regionName;
     @Column(length = 2, nullable = false)
     @JsonProperty("country_code")
-    @NotBlank
+    @NotBlank(message = "Country code cannot be left blank")
     private String countryCode;
 
     private boolean enabled;
     @JsonIgnore
     private boolean trashed;
+
+    public Location() {
+    }
+
+    public Location(String cityName, String countryName, String regionName, String countryCode) {
+        this.cityName = cityName;
+        this.countryName = countryName;
+        this.regionName = regionName;
+        this.countryCode = countryCode;
+    }
+
+    @OneToOne(mappedBy = "location", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private RealtimeWeather realtimeWeather;
 
     public String getCode() {
         return code;
@@ -113,14 +125,14 @@ public class Location {
 
     @Override
     public String toString() {
-        return "Location{" +
-                "code='" + code + '\'' +
-                ", cityName='" + cityName + '\'' +
-                ", countryName='" + countryName + '\'' +
-                ", regionName='" + regionName + '\'' +
-                ", countryCode='" + countryCode + '\'' +
-                ", enabled=" + enabled +
-                ", trashed=" + trashed +
-                '}';
+        return cityName+", "+(regionName != null ? regionName:"")+", "+countryName;
+    }
+
+    public RealtimeWeather getRealtimeWeather() {
+        return realtimeWeather;
+    }
+
+    public void setRealtimeWeather(RealtimeWeather realtimeWeather) {
+        this.realtimeWeather = realtimeWeather;
     }
 }

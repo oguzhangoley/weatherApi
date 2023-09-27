@@ -3,16 +3,25 @@ package com.skyapi.weatherforcast;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Date;
+import java.util.List;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
@@ -24,11 +33,26 @@ public class GlobalExceptionHandler {
 
         error.setTimestamp(new Date());
         error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        error.setError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        error.addError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         error.setPath(request.getServletPath());
 
         logger.error(ex.getMessage(), ex);
 
         return error;
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorDto errorDto = new ErrorDto();
+
+        errorDto.setTimestamp(new Date());
+        errorDto.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorDto.setPath(((ServletWebRequest) request).getRequest().getServletPath());
+
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+
+        fieldErrors.forEach(fe -> errorDto.addError(fe.getDefaultMessage()));
+
+        return new ResponseEntity<>(errorDto, headers, status);
     }
 }
