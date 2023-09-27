@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -18,9 +20,8 @@ public class LocationRepositoryTests {
     private LocationRepository repository;
 
     @Test
-    public void testAddSuccess()
-    {
-        Location location= new Location();
+    public void testAddSuccess() {
+        Location location = new Location();
         location.setCode("NYC_USA");
         location.setCityName("New York City");
         location.setRegionName("New York");
@@ -28,9 +29,44 @@ public class LocationRepositoryTests {
         location.setCountryName("United States of America");
         location.setEnabled(true);
 
-        Location savedLocation =repository.save(location);
+        Location savedLocation = repository.save(location);
 
         assertThat(savedLocation).isNotNull();
         assertThat(savedLocation.getCode()).isEqualTo("NYC_USA");
     }
+
+    @Test
+    public void testListSuccess() {
+        List<Location> locations = repository.findUntrashed();
+
+        assertThat(locations).isNotEmpty();
+        locations.forEach(System.out::println);
+    }
+
+    @Test
+    public void testGetNotFound(){
+        String code = "ABCD";
+        Location location = repository.findByCode(code);
+
+        assertThat(location).isNull();
+    }
+
+    @Test
+    public void testGetOk(){
+        String code = "NYC_USA";
+        Location location = repository.findByCode(code);
+
+        assertThat(location).isNotNull();
+        assertThat(location.getCode()).isEqualTo(code);
+    }
+
+    @Test
+    public void testTrashSuccess(){
+        String code = "DELHI_IN";
+        repository.trashByCode(code);
+
+        Location location = repository.findByCode(code);
+        assertThat(location).isNull();
+    }
+
 }
