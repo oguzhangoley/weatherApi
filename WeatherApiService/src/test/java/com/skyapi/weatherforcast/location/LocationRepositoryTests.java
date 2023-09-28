@@ -13,6 +13,7 @@ import org.springframework.test.annotation.Rollback;
 import java.util.Date;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -96,17 +97,17 @@ public class LocationRepositoryTests {
 
     @Test
     public void testAddHourlyWeatherData(){
-        Location location = repository.findById("MBMH_IN").get();
+        Location location = repository.findById("DELHI_IN").get();
         List<HourlyWeather> listHourlyWeather = location.getListHourlyWeather();
-        HourlyWeather forecast1 = new HourlyWeather().id(location,8)
-                .temperature(20)
-                .precipitation(60)
-                .status("Cloudy");
+        HourlyWeather forecast1 = new HourlyWeather().id(location,10)
+                .temperature(15)
+                .precipitation(40)
+                .status("Sunny");
 
         HourlyWeather forecast2 = new HourlyWeather().location(location)
-                .hourOfDay(9)
-                .temperature(20)
-                .precipitation(60)
+                .hourOfDay(11)
+                .temperature(16)
+                .precipitation(50)
                 .status("Cloudy");
 
         listHourlyWeather.add(forecast1);
@@ -115,6 +116,28 @@ public class LocationRepositoryTests {
         Location updatedLocation = repository.save(location);
 
         assertThat(updatedLocation.getListHourlyWeather()).isNotEmpty();
+    }
+
+    @Test
+    public void testFindBtCountryCodeAndCityNotFound(){
+        String countryCode = "US";
+        String cityName = "New York City";
+
+        Location location = repository.findByCountryCodeAndCityName(countryCode,cityName);
+        assertThat(location).isNull();
+    }
+
+    @Test
+    public void testFindBtCountryCodeAndCityFound(){
+        String countryCode = "IN";
+        String cityName = "New Delhi";
+
+        Location location = repository.findByCountryCodeAndCityName(countryCode,cityName);
+        System.out.println(location);
+        assertThat(location).isNotNull();
+        assertThat(location.getCountryCode()).isEqualTo(countryCode);
+        assertThat(location.getCityName()).isEqualTo(cityName);
+
     }
 
 }

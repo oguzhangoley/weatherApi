@@ -1,6 +1,7 @@
 package com.skyapi.weatherforcast;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         error.setTimestamp(new Date());
         error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         error.addError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        error.setPath(request.getServletPath());
+
+        logger.error(ex.getMessage(), ex);
+
+        return error;
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDto handleBadRequestException(HttpServletRequest request, Exception ex) {
+        ErrorDto error = new ErrorDto();
+
+        error.setTimestamp(new Date());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.addError(ex.getMessage());
+        error.setPath(request.getServletPath());
+
+        logger.error(ex.getMessage(), ex);
+
+        return error;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDto handleConstraintViolationException(HttpServletRequest request, Exception ex) {
+        ErrorDto error = new ErrorDto();
+
+        error.setTimestamp(new Date());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.addError(ex.getMessage());
         error.setPath(request.getServletPath());
 
         logger.error(ex.getMessage(), ex);
