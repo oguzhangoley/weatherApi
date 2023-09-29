@@ -21,9 +21,9 @@ import java.util.List;
 @RequestMapping("/v1/hourly")
 @Validated
 public class HourlyWeatherApiController {
-    private HourlyWeatherService hourlyWeatherService;
-    private GeoLocationService locationService;
-    private ModelMapper mapper;
+    private final HourlyWeatherService hourlyWeatherService;
+    private final GeoLocationService locationService;
+    private final ModelMapper mapper;
 
     public HourlyWeatherApiController(HourlyWeatherService hourlyWeatherService, GeoLocationService locationService, ModelMapper mapper) {
         this.hourlyWeatherService = hourlyWeatherService;
@@ -47,8 +47,6 @@ public class HourlyWeatherApiController {
             return ResponseEntity.ok(listEntity2Dto(hourlyForecast));
         } catch (NumberFormatException | GeoLocationException e) {
             return ResponseEntity.badRequest().build();
-        } catch (LocationNotFoundException e) {
-            return ResponseEntity.notFound().build();
         }
     }
 
@@ -65,16 +63,15 @@ public class HourlyWeatherApiController {
             return ResponseEntity.ok(listEntity2Dto(hourlyForecast));
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().build();
-        } catch (LocationNotFoundException e) {
-            return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/{code}")
-    public ResponseEntity<?> update(@PathVariable("code") String locationCode, @RequestBody @Valid List<HourlyWeather> listDto) throws BadRequestException {
+    public ResponseEntity<?> update(@PathVariable("code") String locationCode, @RequestBody @Valid List<HourlyWeather> listDto) {
         if (listDto.isEmpty()) {
             throw new BadRequestException("Hourly forecast data cannot be empty");
         }
+        List<HourlyWeather> list = hourlyWeatherService.updateByLocationCode(locationCode, listDto);
         return ResponseEntity.accepted().build();
     }
 

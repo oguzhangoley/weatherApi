@@ -2,7 +2,7 @@ package com.skyapi.weatherforcast;
 
 import java.io.IOException;
 
-public class GeoLocationException extends Exception {
+public class GeoLocationException extends RuntimeException {
     public GeoLocationException(String message) {
         super(message);
     }

@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 @Transactional
 public class LocationService {
-    private LocationRepository repository;
+    private final LocationRepository repository;
 
     public LocationService(LocationRepository repository) {
         this.repository = repository;
@@ -24,15 +24,19 @@ public class LocationService {
     }
 
     public Location get(String code) {
-        return repository.findByCode(code);
+        Location location = repository.findByCode(code);
+        if (location == null) {
+            throw new LocationNotFoundException(code);
+        }
+        return location;
     }
 
-    public Location update(Location locationInRequest) throws LocationNotFoundException {
+    public Location update(Location locationInRequest) {
         String code = locationInRequest.getCode();
 
         Location locationInDb = repository.findByCode(code);
         if (locationInDb == null) {
-            throw new LocationNotFoundException("No location found with the given code : " + code);
+            throw new LocationNotFoundException(code);
         }
 
         locationInDb.setTrashed(locationInRequest.isTrashed());
@@ -45,11 +49,11 @@ public class LocationService {
         return repository.save(locationInDb);
     }
 
-    public void delete(String code) throws LocationNotFoundException {
+    public void delete(String code) {
 
         Location location = repository.findByCode(code);
         if (location == null) {
-            throw new LocationNotFoundException("No location found with the given code : " + code);
+            throw new LocationNotFoundException(code);
         }
         repository.trashByCode(code);
         repository.save(location);

@@ -11,38 +11,38 @@ import java.util.Date;
 @Service
 public class RealtimeWeatherService {
 
-    private RealtimeWeatherRepository realtimeWeatherRepository;
-    private LocationRepository locationRepository;
+    private final RealtimeWeatherRepository realtimeWeatherRepository;
+    private final LocationRepository locationRepository;
 
     public RealtimeWeatherService(RealtimeWeatherRepository realtimeWeatherRepository, LocationRepository locationRepository) {
         this.realtimeWeatherRepository = realtimeWeatherRepository;
         this.locationRepository = locationRepository;
     }
 
-    public RealtimeWeather getByLocation(Location location) throws LocationNotFoundException {
+    public RealtimeWeather getByLocation(Location location) {
         String countryCode = location.getCountryCode();
         String city = location.getCityName();
 
         RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByCountryCodeAndCity(countryCode, city);
         if (realtimeWeather == null) {
-            throw new LocationNotFoundException("No Location found with the country code and city name");
+            throw new LocationNotFoundException(countryCode, city);
         }
         return realtimeWeather;
     }
 
-    public RealtimeWeather getByLocationCode(String locationCode) throws LocationNotFoundException {
+    public RealtimeWeather getByLocationCode(String locationCode) {
         RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByLocationCode(locationCode);
 
         if (realtimeWeather == null) {
-            throw new LocationNotFoundException("No location found with the given code: " + locationCode);
+            throw new LocationNotFoundException(locationCode);
         }
         return realtimeWeather;
     }
 
-    public RealtimeWeather update(String locationCode, RealtimeWeather realtimeWeather) throws LocationNotFoundException {
+    public RealtimeWeather update(String locationCode, RealtimeWeather realtimeWeather) {
         Location location = locationRepository.findByCode(locationCode);
         if (location == null) {
-            throw new LocationNotFoundException("No location found with the given code: " + locationCode);
+            throw new LocationNotFoundException(locationCode);
         }
 
         realtimeWeather.setLocation(location);

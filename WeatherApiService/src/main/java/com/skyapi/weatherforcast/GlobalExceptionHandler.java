@@ -1,5 +1,6 @@
 package com.skyapi.weatherforcast;
 
+import com.skyapi.weatherforcast.location.LocationNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -46,6 +47,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorDto handleBadRequestException(HttpServletRequest request, Exception ex) {
+        ErrorDto error = new ErrorDto();
+
+        error.setTimestamp(new Date());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.addError(ex.getMessage());
+        error.setPath(request.getServletPath());
+
+        logger.error(ex.getMessage(), ex);
+
+        return error;
+    }
+
+    @ExceptionHandler(LocationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDto handleLocationNotFoundException(HttpServletRequest request, Exception ex) {
+        ErrorDto error = new ErrorDto();
+
+        error.setTimestamp(new Date());
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.addError(ex.getMessage());
+        error.setPath(request.getServletPath());
+
+        logger.error(ex.getMessage(), ex);
+
+        return error;
+    }
+
+    @ExceptionHandler(GeoLocationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDto handleGeoLocationException(HttpServletRequest request, Exception ex) {
         ErrorDto error = new ErrorDto();
 
         error.setTimestamp(new Date());

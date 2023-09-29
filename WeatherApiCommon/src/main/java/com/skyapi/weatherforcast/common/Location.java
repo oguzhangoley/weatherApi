@@ -42,7 +42,7 @@ public class Location {
     @JsonIgnore
     private boolean trashed;
 
-    @OneToMany(mappedBy = "id.location",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "id.location", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HourlyWeather> listHourlyWeather = new ArrayList<>();
 
     public Location() {
@@ -130,7 +130,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return cityName+", "+(regionName != null ? regionName:"")+", "+countryName;
+        return cityName + ", " + (regionName != null ? regionName : "") + ", " + countryName;
     }
 
     public RealtimeWeather getRealtimeWeather() {
@@ -149,7 +149,7 @@ public class Location {
         this.listHourlyWeather = listHourlyWeather;
     }
 
-    public Location code(String code){
+    public Location code(String code) {
         setCode(code);
         return this;
     }
